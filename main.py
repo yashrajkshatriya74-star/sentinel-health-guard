@@ -227,4 +227,9 @@ def mask_fhir_patient(fhir_json: str) -> str:
         return f"Error masking FHIR data: {str(e)}"
  
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
+    import os
+    # Railway automatically PORT environment variable deta hai
+    port = int(os.environ.get("PORT", 8000)) 
+    
+    # Ye line sabse important hai: host='0.0.0.0'
+    mcp.run(transport="sse", host="0.0.0.0", port=port)
