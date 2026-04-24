@@ -134,7 +134,11 @@ def mask_fhir_patient(fhir_json: str) -> str:
 
 if __name__ == "__main__":
     # Railway environment configuration
-    port = int(os.environ.get("PORT", 8000)) 
+    # FastMCP.run() automatically port handle kar leta hai jab transport="sse" ho
+    print("🚀 Sentinel-Health-Guard is starting...")
+    
+    # Nayi libraries mein host/port keyword hata kar sirf transport dena hota hai
+    mcp.run(transport="sse")
     print(f"🚀 Sentinel-Health-Guard is LIVE on port {port}")
     
     # Running with SSE transport for Prompt Opinion compatibility
