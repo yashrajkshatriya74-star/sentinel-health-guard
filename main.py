@@ -49,6 +49,7 @@ def health():
 # -------- MCP ASGI APP --------
 mcp_app = mcp.asgi()   # 🔥 THIS IS THE FIX
 
+mcp_app = mcp.asgi()
 app.mount("/mcp", mcp_app)
 
 
