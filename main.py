@@ -1,80 +1,39 @@
-from fastapi import FastAPI
+from mcp.server.fastmcp import FastMCP
 import json
-import random
-from datetime import datetime
-import os
 
-app = FastAPI()
+mcp = FastMCP("Sentinel-Health-Guard")
 
-FAKE_NAMES = ["Patient-Alpha", "Patient-Beta", "Patient-Gamma"]
-FAKE_PHONES = ["XXX-XXXX", "YYY-YYYY"]
-FAKE_ADDRESSES = ["123 Privacy Lane", "456 Secure Blvd"]
+@mcp.tool()
+def health_check() -> str:
+    return "✅ Server running"
 
-LOG_PATH = os.path.join(os.getcwd(), "audit_log.txt")
-
-
-def write_log(msg):
+@mcp.tool()
+def audit_patient_data(fhir_json: str) -> str:
     try:
-        with open(LOG_PATH, "a") as f:
-            f.write(msg + "\n")
+        data = json.loads(fhir_json)
+
+        if not isinstance(data, dict):
+            return "❌ Invalid JSON object"
+
+        findings = []
+
+        if "name" in data:
+            findings.append("⚠️ Name detected")
+
+        if "address" in data:
+            findings.append("⚠️ Address detected")
+
+        if "telecom" in data:
+            findings.append("⚠️ Contact detected")
+
+        if not findings:
+            return "✅ Safe data"
+
+        return "\n".join(findings)
+
     except:
-        pass
-
-
-def parse_json(data):
-    if not isinstance(data, dict):
-        return None, "Invalid JSON object"
-    return data, None
-
-
-# ---------------- ROUTES ----------------
-
-@app.get("/")
-def root():
-    return {"status": "Sentinel running ✅"}
-
-
-@app.post("/audit")
-def audit(data: dict):
-    findings = []
-
-    if "name" in data:
-        findings.append("Name detected")
-    if "telecom" in data:
-        findings.append("Phone detected")
-    if "address" in data:
-        findings.append("Address detected")
-
-    if not findings:
-        return {"result": "Safe"}
-
-    return {"result": findings}
-
-
-@app.post("/mask")
-def mask(data: dict):
-    for key in ["name", "telecom", "address", "birthDate", "identifier"]:
-        if key in data:
-            data[key] = "[REDACTED]"
-
-    return {"masked": data}
-
-
-@app.post("/synthetic")
-def synthetic(data: dict):
-    if "name" in data:
-        data["name"] = random.choice(FAKE_NAMES)
-    if "telecom" in data:
-        data["telecom"] = random.choice(FAKE_PHONES)
-    if "address" in data:
-        data["address"] = random.choice(FAKE_ADDRESSES)
-
-    return {"synthetic": data}
-
-
-# ---------------- RUN ----------------
+        return "❌ Invalid JSON"
 
 if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    print("🚀 MCP Server starting...")
+    mcp.run()
