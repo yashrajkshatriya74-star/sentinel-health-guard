@@ -136,11 +136,11 @@ def mask_fhir_patient(fhir_json: str) -> str:
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    app = mcp.sse_app()
+    app = mcp.streamable_http_app()
     uvicorn.run(
-        app, 
-        host="0.0.0.0", 
+        app,
+        host="0.0.0.0",
         port=port,
-        forwarded_allow_ips="*",
-        proxy_headers=True
+        proxy_headers=True,
+        forwarded_allow_ips="*"
     )
