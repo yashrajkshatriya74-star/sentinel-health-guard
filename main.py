@@ -26,7 +26,13 @@ def write_log(message: str):
 def audit_patient_data(fhir_json: str) -> str:
     """Healthcare data ko scan karke privacy risks detect karta hai with Risk Score."""
     try:
-        data = json.loads(fhir_json)
+    data = json.loads(fhir_json)
+
+    if not isinstance(data, dict):
+        return "❌ Invalid JSON format: Expected an object"
+
+except json.JSONDecodeError:
+    return "❌ Invalid JSON: Could not parse input"
         findings = []
         risk_points = 0
         total_points = 0
@@ -77,7 +83,13 @@ def audit_patient_data(fhir_json: str) -> str:
 def mask_patient_data(fhir_json: str) -> str:
     """Sensitive data ko automatically mask karta hai."""
     try:
-        data = json.loads(fhir_json)
+    data = json.loads(fhir_json)
+
+    if not isinstance(data, dict):
+        return "❌ Invalid JSON format: Expected an object"
+
+except json.JSONDecodeError:
+    return "❌ Invalid JSON: Could not parse input"
  
         if "name" in data:
             data["name"] = "[REDACTED]"
@@ -101,7 +113,14 @@ def mask_patient_data(fhir_json: str) -> str:
 def synthetic_patient_data(fhir_json: str) -> str:
     """Real PII ko fake synthetic data se replace karta hai research ke liye."""
     try:
-        data = json.loads(fhir_json)
+        data = json.loads(fhir_json)try:
+    data = json.loads(fhir_json)
+
+    if not isinstance(data, dict):
+        return "❌ Invalid JSON format: Expected an object"
+
+except json.JSONDecodeError:
+    return "❌ Invalid JSON: Could not parse input"
  
         if "name" in data:
             data["name"] = random.choice(FAKE_NAMES)
@@ -139,7 +158,13 @@ def synthetic_patient_data(fhir_json: str) -> str:
 def audit_fhir_patient(fhir_json: str) -> str:
     """Real FHIR R4 Patient resource ko audit karta hai — HIPAA compliance check."""
     try:
-        data = json.loads(fhir_json)
+    data = json.loads(fhir_json)
+
+    if not isinstance(data, dict):
+        return "❌ Invalid JSON format: Expected an object"
+
+except json.JSONDecodeError:
+    return "❌ Invalid JSON: Could not parse input"
         findings = []
         risk_points = 0
         total_points = 0
@@ -192,8 +217,14 @@ def audit_fhir_patient(fhir_json: str) -> str:
 @mcp.tool()
 def mask_fhir_patient(fhir_json: str) -> str:
     """Real FHIR R4 Patient resource ko mask karta hai — HIPAA compliant output."""
-    try:
-        data = json.loads(fhir_json)
+   try:
+    data = json.loads(fhir_json)
+
+    if not isinstance(data, dict):
+        return "❌ Invalid JSON format: Expected an object"
+
+except json.JSONDecodeError:
+    return "❌ Invalid JSON: Could not parse input"
  
         if "name" in data:
             data["name"] = [{"use": "anonymous", "family": "REDACTED", "given": ["REDACTED"]}]
