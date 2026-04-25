@@ -132,10 +132,9 @@ def mask_fhir_patient(fhir_json: str) -> str:
     except Exception as e:
         return f"Error: {str(e)}"
 
+
 if __name__ == "__main__":
+    import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    print(f"🚀 Sentinel-Health-Guard is starting on port {port}")
-    mcp.run(transport="sse", host="0.0.0.0", port=port)
-    
-    # Running with SSE transport for Prompt Opinion compatibility
-    mcp.run(transport="sse", host="0.0.0.0", port=port)
+    app = mcp.sse_app()
+    uvicorn.run(app, host="0.0.0.0", port=port)
