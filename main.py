@@ -15,8 +15,11 @@ LOG_PATH = os.path.join(os.getcwd(), "audit_log.txt")
  
  
 def write_log(message: str):
-    with open(LOG_PATH, "a") as log_file:
-        log_file.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    try:
+        with open(LOG_PATH, "a") as log_file:
+            log_file.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    except Exception:
+        pass  # crash avoid
  
  
 @mcp.tool()
