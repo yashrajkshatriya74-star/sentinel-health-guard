@@ -107,6 +107,4 @@ def health_check() -> str:
 
 if __name__ == "__main__":
     print("🚀 Server starting...")
-    mcp.run(transport="http")
-
-    mcp.run(transport="http")
+    mcp.run(transport="sse")
