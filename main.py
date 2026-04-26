@@ -92,12 +92,13 @@ def synthetic_patient_data(fhir_json: str) -> str:
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":
+    import uvicorn
+    import os
+
     port = int(os.environ.get("PORT", 8000))
 
-    print("🚀 MCP Server running on port:", port)
-
-    mcp.run(
-        transport="sse",
+    uvicorn.run(
+        mcp.app,   # 👈 IMPORTANT
         host="0.0.0.0",
         port=port
     )
