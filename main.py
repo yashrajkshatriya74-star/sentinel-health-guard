@@ -10,7 +10,7 @@ FAKE_NAMES = ["Patient-Alpha", "Patient-Beta", "Patient-Gamma", "Patient-Delta",
 FAKE_PHONES = ["XXX-XXXX", "YYY-YYYY", "ZZZ-ZZZZ"]
 FAKE_ADDRESSES = ["123 Privacy Lane", "456 Secure Blvd", "789 Safe Street"]
 
-LOG_PATH = r"F:\SentinelProject\Agents_Assemble_MCP\audit_log.txt"
+LOG_PATH = "audit_log.txt"
 
 
 def write_log(message: str):
