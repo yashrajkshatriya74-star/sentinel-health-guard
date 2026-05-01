@@ -228,7 +228,7 @@ def mask_fhir_patient(fhir_json: str) -> str:
 
 
 if __name__ == "__main__":
-    from fastapi import FastAPI
+    from fastapi import FastAPI, Request
     import uvicorn
 
     app = FastAPI()
@@ -236,6 +236,14 @@ if __name__ == "__main__":
     @app.get("/")
     def home():
         return {"status": "Sentinel MCP running"}
+
+    @app.post("/")
+    async def handle_post(request: Request):
+        data = await request.json()
+        return {
+            "message": "POST received",
+            "data": data
+        }
 
     port = 8000
     uvicorn.run(app, host="0.0.0.0", port=port)
