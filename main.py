@@ -228,12 +228,4 @@ def mask_fhir_patient(fhir_json: str) -> str:
 
 
 if __name__ == "__main__":
-    import os
-    import uvicorn
-    from fastmcp import create_app
-
-    app = create_app(mcp)
-
-    port = int(os.environ.get("PORT", 8000))
-
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    mcp.run()
