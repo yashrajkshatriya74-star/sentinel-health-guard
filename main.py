@@ -228,17 +228,4 @@ def mask_fhir_patient(fhir_json: str) -> str:
 
 
 if __name__ == "__main__":
-    from fastapi import FastAPI
-    import uvicorn
-
-    app = FastAPI()
-
-    @app.get("/")
-    def home():
-        return {"status": "Sentinel MCP running"}
-
-    @app.get("/sse")
-    def sse():
-        return {"message": "MCP endpoint active"}
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    mcp.run()
