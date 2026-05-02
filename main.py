@@ -232,7 +232,6 @@ if __name__ == "__main__":
     import uvicorn
     from mcp.server.fastmcp import create_app
 
-    # ✅ THIS WORKS IN ALL VERSIONS
     app = create_app(mcp)
 
     port = int(os.environ.get("PORT", 8000))
