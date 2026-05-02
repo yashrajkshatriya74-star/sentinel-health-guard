@@ -228,4 +228,8 @@ def mask_fhir_patient(fhir_json: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    import uvicorn
+
+    app = mcp  # 👈 direct use karo
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
