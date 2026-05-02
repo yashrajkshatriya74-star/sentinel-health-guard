@@ -1,4 +1,4 @@
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 import json
 import random
 from datetime import datetime
@@ -230,7 +230,7 @@ def mask_fhir_patient(fhir_json: str) -> str:
 if __name__ == "__main__":
     import os
     import uvicorn
-    from mcp.server.fastmcp import create_app
+    from fastmcp import create_app
 
     app = create_app(mcp)
 
