@@ -228,6 +228,4 @@ def mask_fhir_patient(fhir_json: str) -> str:
 
 
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 8000))
-    mcp.run(transport="sse", port=port)
+    mcp.run()
