@@ -56,13 +56,29 @@ def health_check() -> str:
 if __name__ == "__main__":
     import uvicorn
     import os
+    from starlette.applications import Starlette
+    from starlette.routing import Route, Mount
+    from starlette.responses import JSONResponse
+    
+    async def health(request):
+        return JSONResponse({"status": "ok", "server": "Sentinel-Health-Guard"})
+    
     port = int(os.environ.get("PORT", 10000))
-    app = mcp.sse_app()
-    uvicorn.run(
+    sse = mcp.sse_app()
+    
+    app = Starlette(routes=[
+        Route("/health", health),
+        Mount("/", app=sse),
+    ])
+    
+    config = uvicorn.Config(
         app,
         host="0.0.0.0",
         port=port,
         proxy_headers=True,
         forwarded_allow_ips="*",
-        server_header=False
     )
+    server = uvicorn.Server(config)
+    
+    import asyncio
+    asyncio.run(server.serve())
