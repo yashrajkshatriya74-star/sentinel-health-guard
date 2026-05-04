@@ -54,21 +54,15 @@ def health_check() -> str:
     return "✅ Sentinel-Health-Guard is running!"
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    
     import uvicorn
-    from starlette.applications import Starlette
-    from starlette.routing import Mount
-    from starlette.middleware import Middleware
-    from starlette.middleware.trustedhost import TrustedHostMiddleware
-    
-    sse_app = mcp.sse_app()
-    
-    app = Starlette(
-        routes=[Mount("/", app=sse_app)],
-        middleware=[
-            Middleware(TrustedHostMiddleware, allowed_hosts=["*"])
-        ]
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    app = mcp.sse_app()
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=port,
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+        server_header=False
     )
-    
-    uvicorn.run(app, host="0.0.0.0", port=port, proxy_headers=True, forwarded_allow_ips="*")
