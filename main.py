@@ -356,5 +356,26 @@ def hipaa_compliance_report(fhir_json: str) -> str:
 
 if __name__ == "__main__":
     import uvicorn
+    from starlette.applications import Starlette
+    from starlette.routing import Route, Mount
+    from starlette.responses import PlainTextResponse
+
     port = int(os.environ.get("PORT", 10000))
-    mcp.run(transport="sse", host="0.0.0.0", port=port)
+
+    async def health(request):
+        return PlainTextResponse("OK")
+
+    sse_application = mcp.sse_app()
+
+    app = Starlette(routes=[
+        Route("/health", health),
+        Mount("/", app=sse_application),
+    ])
+
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=port,
+        proxy_headers=True,
+        forwarded_allow_ips="*"
+    )
