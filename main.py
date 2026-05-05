@@ -358,6 +358,8 @@ if __name__ == "__main__":
     import uvicorn
     from starlette.applications import Starlette
     from starlette.routing import Route, Mount
+    from starlette.middleware import Middleware
+    from starlette.middleware.trustedhost import TrustedHostMiddleware
     from starlette.responses import PlainTextResponse, JSONResponse
 
     port = int(os.environ.get("PORT", 10000))
@@ -366,22 +368,30 @@ if __name__ == "__main__":
         return PlainTextResponse("OK")
 
     async def root(request):
-        return JSONResponse({"status": "Sentinel Health Guard MCP Server Running"})
+        return JSONResponse({"status": "Sentinel Health Guard Running"})
 
     sse_application = mcp.sse_app()
 
-    app = Starlette(routes=[
-        Route("/", root),
-        Route("/health", health),
-        Mount("/", app=sse_application),
-    ])
+    middleware = [
+        Middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=["*"]
+        )
+    ]
+
+    app = Starlette(
+        routes=[
+            Route("/", root),
+            Route("/health", health),
+            Mount("/", app=sse_application),
+        ],
+        middleware=middleware
+    )
 
     uvicorn.run(
-    app,
-    host="0.0.0.0",
-    port=port,
-    proxy_headers=True,
-    forwarded_allow_ips="*",
-    server_header=False,
-    host_header=None
-)
+        app,
+        host="0.0.0.0",
+        port=port,
+        proxy_headers=True,
+        forwarded_allow_ips="*"
+    )
