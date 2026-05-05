@@ -358,16 +358,20 @@ if __name__ == "__main__":
     import uvicorn
     from starlette.applications import Starlette
     from starlette.routing import Route, Mount
-    from starlette.responses import PlainTextResponse
+    from starlette.responses import PlainTextResponse, JSONResponse
 
     port = int(os.environ.get("PORT", 10000))
 
     async def health(request):
         return PlainTextResponse("OK")
 
+    async def root(request):
+        return JSONResponse({"status": "Sentinel Health Guard MCP Server Running"})
+
     sse_application = mcp.sse_app()
 
     app = Starlette(routes=[
+        Route("/", root),
         Route("/health", health),
         Mount("/", app=sse_application),
     ])
