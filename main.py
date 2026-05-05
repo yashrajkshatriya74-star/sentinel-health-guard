@@ -1,21 +1,23 @@
 from mcp.server.fastmcp import FastMCP
 import json
 import random
+import os
 from datetime import datetime
 
 mcp = FastMCP("Sentinel-Health-Guard")
 
-# Synthetic names database
 FAKE_NAMES = ["Patient-Alpha", "Patient-Beta", "Patient-Gamma", "Patient-Delta", "Patient-Epsilon"]
 FAKE_PHONES = ["XXX-XXXX", "YYY-YYYY", "ZZZ-ZZZZ"]
 FAKE_ADDRESSES = ["123 Privacy Lane", "456 Secure Blvd", "789 Safe Street"]
-
 LOG_PATH = "audit_log.txt"
 
 
 def write_log(message: str):
-    with open(LOG_PATH, "a") as log_file:
-        log_file.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    try:
+        with open(LOG_PATH, "a") as log_file:
+            log_file.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    except:
+        pass
 
 
 @mcp.tool()
@@ -75,16 +77,9 @@ def mask_patient_data(fhir_json: str) -> str:
     try:
         data = json.loads(fhir_json)
 
-        if "name" in data:
-            data["name"] = "[REDACTED]"
-        if "telecom" in data:
-            data["telecom"] = "[REDACTED]"
-        if "address" in data:
-            data["address"] = "[REDACTED]"
-        if "birthDate" in data:
-            data["birthDate"] = "[REDACTED]"
-        if "identifier" in data:
-            data["identifier"] = "[REDACTED]"
+        for field in ["name", "telecom", "address", "birthDate", "identifier"]:
+            if field in data:
+                data[field] = "[REDACTED]"
 
         write_log("Data masked. Fields redacted: name, telecom, address, birthDate, identifier")
         return "✅ Masked Data:\n" + json.dumps(data, indent=2)
@@ -227,14 +222,145 @@ def mask_fhir_patient(fhir_json: str) -> str:
         return f"Error masking FHIR data: {str(e)}"
 
 
+@mcp.tool()
+def check_consent(fhir_json: str) -> str:
+    """Check karta hai ki patient ne data sharing consent di hai ya nahi."""
+    try:
+        data = json.loads(fhir_json)
+
+        consent_fields = ["consent", "authorization", "permission"]
+        has_consent = any(field in data for field in consent_fields)
+
+        if has_consent:
+            return "✅ Consent Verified: Patient has given authorization for data sharing."
+        else:
+            return "❌ No Consent Found: Patient authorization missing!\n⚠️ Do NOT share this data without explicit patient consent.\n💡 Add 'consent' field with patient authorization details."
+
+    except Exception as e:
+        return f"Error checking consent: {str(e)}"
+
+
+@mcp.tool()
+def batch_audit(patients_json: str) -> str:
+    """Multiple patients ka data ek saath audit karta hai."""
+    try:
+        patients = json.loads(patients_json)
+
+        if not isinstance(patients, list):
+            return "❌ Error: Please provide a JSON array of patients."
+
+        report = f"📋 Batch Audit Report — {len(patients)} Patients\n"
+        report += "═" * 50 + "\n"
+
+        high_risk = 0
+        medium_risk = 0
+        low_risk = 0
+
+        checks = [("name", 30), ("telecom", 25), ("address", 20),
+                  ("birthDate", 10), ("identifier", 15), ("id", 5), ("gender", 5)]
+        total_points = sum(c[1] for c in checks)
+
+        for i, patient in enumerate(patients):
+            risk_points = 0
+            for field, points in checks:
+                if field in patient:
+                    risk_points += points
+
+            safe_percent = 100 - int((risk_points / total_points) * 100)
+
+            if safe_percent >= 80:
+                label = "🟢 LOW"
+                low_risk += 1
+            elif safe_percent >= 50:
+                label = "🟡 MEDIUM"
+                medium_risk += 1
+            else:
+                label = "🔴 HIGH"
+                high_risk += 1
+
+            patient_name = patient.get("name", f"Patient-{i+1}")
+            report += f"Patient {i+1}: {patient_name} — {safe_percent}% Safe {label} RISK\n"
+
+        report += "═" * 50 + "\n"
+        report += f"📊 Summary:\n"
+        report += f"  🔴 High Risk: {high_risk} patients\n"
+        report += f"  🟡 Medium Risk: {medium_risk} patients\n"
+        report += f"  🟢 Low Risk: {low_risk} patients\n"
+        report += f"  ⚠️ Action Required: {high_risk + medium_risk} patients need masking!"
+
+        write_log(f"Batch audit performed on {len(patients)} patients.")
+        return report
+
+    except Exception as e:
+        return f"Error in batch audit: {str(e)}"
+
+
+@mcp.tool()
+def hipaa_compliance_report(fhir_json: str) -> str:
+    """Detailed HIPAA compliance report generate karta hai."""
+    try:
+        data = json.loads(fhir_json)
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        report = f"📄 HIPAA COMPLIANCE REPORT\n"
+        report += f"Generated: {timestamp}\n"
+        report += "═" * 50 + "\n\n"
+
+        phi_categories = {
+            "name": ("Patient Name", "HIPAA §164.514(b)(2)(i)", "HIGH"),
+            "telecom": ("Phone/Email", "HIPAA §164.514(b)(2)(ii)", "HIGH"),
+            "address": ("Geographic Data", "HIPAA §164.514(b)(2)(iii)", "HIGH"),
+            "birthDate": ("Date of Birth", "HIPAA §164.514(b)(2)(v)", "MEDIUM"),
+            "identifier": ("ID Numbers (SSN/MRN)", "HIPAA §164.514(b)(2)(ix)", "HIGH"),
+            "gender": ("Gender", "HIPAA §164.514(b)(2)", "LOW"),
+            "id": ("Patient ID", "HIPAA §164.514(b)(2)(ix)", "LOW"),
+        }
+
+        violations = []
+        warnings = []
+
+        report += "🔍 PHI DETECTION RESULTS:\n"
+        report += "─" * 40 + "\n"
+
+        for field, (name, regulation, risk) in phi_categories.items():
+            if field in data:
+                status = "❌ FOUND"
+                if risk == "HIGH":
+                    violations.append(f"{name} ({regulation})")
+                else:
+                    warnings.append(f"{name} ({regulation})")
+                report += f"{status} | {name} | Risk: {risk} | Ref: {regulation}\n"
+
+        report += "\n📊 COMPLIANCE SUMMARY:\n"
+        report += "─" * 40 + "\n"
+        report += f"🚨 Violations (High Risk): {len(violations)}\n"
+        report += f"⚠️  Warnings (Low-Med Risk): {len(warnings)}\n"
+
+        if violations:
+            report += "\n🚨 IMMEDIATE ACTION REQUIRED:\n"
+            for v in violations:
+                report += f"  • Remove/Mask: {v}\n"
+
+        if len(violations) == 0:
+            report += "\n✅ COMPLIANT: No high-risk PHI detected.\n"
+        else:
+            report += f"\n❌ NON-COMPLIANT: {len(violations)} HIPAA violations found.\n"
+            report += "💡 Run mask_patient_data to achieve compliance.\n"
+
+        write_log(f"HIPAA Report generated. Violations: {len(violations)}")
+        return report
+
+    except Exception as e:
+        return f"Error generating report: {str(e)}"
+
+
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.environ.get("PORT", 10000))
     app = mcp.sse_app()
     uvicorn.run(
-        app, 
-        host="0.0.0.0", 
+        app,
+        host="0.0.0.0",
         port=port,
         proxy_headers=True,
         forwarded_allow_ips="*"
