@@ -3,7 +3,6 @@ import json
 import random
 import os
 from datetime import datetime
-from mcp.server.transport_security import TransportSecuritySettings
 
 mcp = FastMCP("Sentinel-Health-Guard")
 
@@ -357,7 +356,9 @@ def hipaa_compliance_report(fhir_json: str) -> str:
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 10000))
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    port = int(os.environ.get("PORT", 8000))
 
     security_settings = TransportSecuritySettings(
         enable_dns_rebinding_protection=False
