@@ -4,6 +4,8 @@ import random
 import os
 from datetime import datetime
 
+os.environ["MCP_ALLOWED_HOSTS"] = "*"
+
 mcp = FastMCP("Sentinel-Health-Guard")
 
 FAKE_NAMES = ["Patient-Alpha", "Patient-Beta", "Patient-Gamma", "Patient-Delta", "Patient-Epsilon"]
