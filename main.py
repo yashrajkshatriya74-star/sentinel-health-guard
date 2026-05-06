@@ -3,8 +3,11 @@ import json
 import random
 import os
 from datetime import datetime
+from mcp.server.transport_security import TransportSecuritySettings
 
 mcp = FastMCP("Sentinel-Health-Guard")
+
+from mcp.server.transport_security import TransportSecuritySettings
 
 FAKE_NAMES = ["Patient-Alpha", "Patient-Beta", "Patient-Gamma", "Patient-Delta", "Patient-Epsilon"]
 FAKE_PHONES = ["XXX-XXXX", "YYY-YYYY", "ZZZ-ZZZZ"]
@@ -356,39 +359,13 @@ def hipaa_compliance_report(fhir_json: str) -> str:
 
 if __name__ == "__main__":
     import uvicorn
-    from starlette.applications import Starlette
-    from starlette.routing import Mount, Route
-    from starlette.responses import PlainTextResponse
-    from starlette.middleware import Middleware
-    from starlette.middleware.base import BaseHTTPMiddleware
-
     port = int(os.environ.get("PORT", 10000))
 
-    # Host header fix karne wala middleware
-    class FixHostMiddleware(BaseHTTPMiddleware):
-        async def dispatch(self, request, call_next):
-            # Host header override karo
-            request.scope["headers"] = [
-                (k, v) for k, v in request.scope["headers"]
-                if k.lower() != b"host"
-            ]
-            request.scope["headers"].append(
-                (b"host", b"sentinel-health-guard-production.up.railway.app")
-            )
-            return await call_next(request)
-
-    async def health(request):
-        return PlainTextResponse("OK")
-
-    sse_application = mcp.sse_app()
-
-    app = Starlette(
-        routes=[
-            Route("/health", health),
-            Mount("/", app=sse_application),
-        ],
-        middleware=[Middleware(FixHostMiddleware)]
+    security_settings = TransportSecuritySettings(
+        enable_dns_rebinding_protection=False
     )
+
+    app = mcp.sse_app(transport_security=security_settings)
 
     uvicorn.run(
         app,
