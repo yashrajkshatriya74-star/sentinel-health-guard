@@ -358,7 +358,7 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 10000))
     
-    app = mcp.http_app(transport="sse")
+    app = mcp.sse_app()
     
     uvicorn.run(
         app,
