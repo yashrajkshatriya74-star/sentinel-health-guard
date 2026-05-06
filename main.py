@@ -7,8 +7,6 @@ from mcp.server.transport_security import TransportSecuritySettings
 
 mcp = FastMCP("Sentinel-Health-Guard")
 
-from mcp.server.transport_security import TransportSecuritySettings
-
 FAKE_NAMES = ["Patient-Alpha", "Patient-Beta", "Patient-Gamma", "Patient-Delta", "Patient-Epsilon"]
 FAKE_PHONES = ["XXX-XXXX", "YYY-YYYY", "ZZZ-ZZZZ"]
 FAKE_ADDRESSES = ["123 Privacy Lane", "456 Secure Blvd", "789 Safe Street"]
