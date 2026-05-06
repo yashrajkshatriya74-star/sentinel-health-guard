@@ -357,4 +357,14 @@ def hipaa_compliance_report(fhir_json: str) -> str:
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 10000))
-    mcp.run(transport="sse", host="0.0.0.0", port=port)
+    
+    app = mcp.http_app(transport="sse")
+    
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=port,
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+        http="h11"
+    )
