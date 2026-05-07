@@ -360,13 +360,14 @@ if __name__ == "__main__":
     import uvicorn
     from mcp.server.transport_security import TransportSecuritySettings
 
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 7860))
 
-    security_settings = TransportSecuritySettings(
+    
+    mcp.settings.transport_security = TransportSecuritySettings(
         enable_dns_rebinding_protection=False
     )
 
-    app = mcp.sse_app(transport_security=security_settings)
+    app = mcp.sse_app()
 
     uvicorn.run(
         app,
