@@ -93,11 +93,13 @@ Patient Data → Sentinel-Health-Guard → Privacy Audit → Safe AI Input
 - **FHIR R4** — Healthcare data standard
 - **Claude Desktop** — Local MCP integration
 - **Prompt Opinion** — Healthcare AI agent platform
+- **HuggingFace Spaces** — Cloud deployment via Docker
 
 ---
 
 ## 📋 Installation
 
+### Local Setup
 ```bash
 git clone https://github.com/yashrajkshatriya74-star/sentinel-health-guard.git
 cd sentinel-health-guard
@@ -105,6 +107,18 @@ pip install -r requirements.txt
 python main.py
 ```
 
+### 🌐 Live MCP Server (24/7)
+**HuggingFace Space:**
+https://yashrajkshatriya74-sentinel-health-guard.hf.space/sse
+
+**PromptOpinion Demo:**
+https://app.promptopinion.ai/workspaces/019db00d-ed8f-7232-823d-200ca37110b0/launchpad
+
+### 🐳 Docker
+```bash
+docker build -t sentinel-health-guard .
+docker run -p 7860:7860 sentinel-health-guard
+```
 ---
 
 ## 🔧 Claude Desktop Integration
