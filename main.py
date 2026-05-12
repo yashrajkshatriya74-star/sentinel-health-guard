@@ -8,18 +8,6 @@ os.environ["MCP_ALLOWED_HOSTS"] = "*"
 
 mcp = FastMCP("Sentinel-Health-Guard")
 
-# FHIR Context Extension for Prompt Opinion
-mcp.settings.capabilities = {
-    "extensions": {
-        "ai.promptopinion/fhir-context": {
-            "scopes": [
-                {"name": "patient/Patient.rs", "required": True},
-                {"name": "patient/Condition.rs"}
-            ]
-        }
-    }
-}
-
 FAKE_NAMES = ["Patient-Alpha", "Patient-Beta", "Patient-Gamma", "Patient-Delta", "Patient-Epsilon"]
 FAKE_PHONES = ["XXX-XXXX", "YYY-YYYY", "ZZZ-ZZZZ"]
 FAKE_ADDRESSES = ["123 Privacy Lane", "456 Secure Blvd", "789 Safe Street"]
